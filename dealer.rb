@@ -4,10 +4,8 @@ class Dealer < Player
     super('Dealer')
   end
 
-  def take_card(cards)
-    # return if hand_count >= 17
-    super
+  def take_card(card)
+    return if hand_count >= 17
+    super(card)
   end
-
-
 end

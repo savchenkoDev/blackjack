@@ -8,6 +8,10 @@ class Player
     @hand = []
   end
 
+  def over?
+    hand_count > 21
+  end
+
   def take_card(card)
     @hand << card
   end
@@ -15,11 +19,16 @@ class Player
   def skip_card; end
 
   def hand_count
+    aces = []
     sum = 0
     @hand.each do |card|
       par = card[0..-2]
-      puts "Номинал #{par}"
-      sum += 'KQJA'.include?(par) ? 10 : par.to_i
+      aces << par if par == 'A'
+      sum += 'KQJ'.include?(par) ? 10 : par.to_i
+    end
+    return sum if aces.empty?
+    aces.size.times do
+      sum += sum + 11 > 21 ? 1 : 11
     end
     sum
   end
