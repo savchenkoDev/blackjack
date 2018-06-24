@@ -14,9 +14,8 @@ class Blackjack
   def menu
     loop do
       answer = @interface.get_user_answer(MAIN_MENU)
-      case answer
-      when 1 then new_game
-      when 2 then return
+      return if answer != 1
+      new_game
       end
     end
   end
@@ -92,6 +91,8 @@ class Blackjack
       dealer_win
     elsif @dealer.over?
       user_win
+    elsif @user.hand_count == @dealer.hand_count
+      equally
     else
       @user.hand_count > @dealer.hand_count ? user_win : dealer_win
     end
@@ -112,6 +113,12 @@ class Blackjack
   def user_win
     @interface.show_message 'Вы выиграли.'
     @user.bank += @bank
+  end
+
+  def equally
+    @user.bank += @bank / 2
+    @dealer.bank += @bank / 2
+    @bank = 0
   end
 
   # Interface helpers
