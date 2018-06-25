@@ -3,59 +3,55 @@ require_relative 'dealer.rb'
 require_relative 'player.rb'
 require_relative 'user.rb'
 require_relative 'interface.rb'
+require_relative 'deck.rb'
+require_relative 'rules.rb'
+require_relative 'bank.rb'
 
 class Blackjack
   def initialize
-    @cards = CARDS.shuffle
+    @deck = create_deck
+    @rules = Rules.new
     @interface = Interface.new
-    @bank = 0
+    @bank = BankManager.new
   end
 
   def menu
     loop do
-      answer = @interface.get_user_answer(MAIN_MENU)
+      answer = @interface.get_user_answer(:main_menu)
       return if answer != 1
       new_game
-      end
     end
-  end
-
-  def new_game
-    name = if @user.nil?
-             @interface.get_user_name
-           else
-             @user.name
-           end
-    @user = User.new(name)
-    @dealer = Dealer.new
-    @interface.show_welcome(name)
-    loop do
-      return if @user.bank > 0 && @dealer.bank > 0
-      distribution
-    end
-    @interface.show_message 'Вы победили дилера' if @dealer.bank.zero?
-    @interface.show_message 'Вы проиграли все деньги' if @user.bank.zero?
-    menu
   end
 
   private
+
+  def new_game
+    name = @user.nil? ? @interface.get_user_name : @user.name
+    @user = User.new(name)
+    @dealer = Dealer.new
+    @interface.show_welcome(name)
+    while @user.money > 0 && @dealer.money > 0 do distribution end
+    @interface.show_message(:victory) if @dealer.money.zero?
+    @interface.show_message(:loose) if @user.money.zero?
+    menu
+  end
 
   def distribution
     @interface.new_distr
     dustribution_start
     user_turn
     dealer_turn
-    bank_calculate
+    winner!
+    distribution_end
+    @interface.next_distr
   end
 
   def dustribution_start
-    @cards = CARDS if @cards.size < 5
-    @dealer.bank -= BET
-    @user.bank -= BET
-    @bank += BET * 2
-    (1..4).each do |i|
-      player = i.odd? ? @user : @dealer
-      player.take_card(card)
+    @deck = Deck.new if @deck.size < 5
+    @bank.add(@dealer, @user)
+    2.times do
+      @user.hand << one_card
+      @dealer.hand << one_card
     end
   end
 
@@ -63,65 +59,57 @@ class Blackjack
     loop do
       show_dealer_hand
       @interface.show_hand(@user)
-      @interface.show_message "#{@user.name}, Ваш ход"
-      answer = @interface.get_user_answer(VARIANTS)
+      return @interface.show_message(:user_over) if @rules.over?(@user)
+      @interface.show_message(:user_turn)
+      answer = @interface.get_user_answer(:distr_answer)
       return if answer != 1
-      @user.take_card(card)
-      show_dealer_hand
-      @interface.show_hand(@user)
-      return @interface.show_message 'Перебор' if @user.over?
+      @user.take_card(one_card)
     end
   end
 
   def dealer_turn
-    return if @user.over?
-    @interface.show_message 'Ход дилера'
+    return if @rules.over?(@user)
+    @interface.show_message(:dealer_turn)
     @interface.show_hand(@dealer)
     while @dealer.hand_count < 17
-      @interface.show_message 'Дилер взял карту'
-      @dealer.take_card(card)
+      @interface.show_message(:dealer_take_card)
+      @dealer.take_card(one_card)
       @interface.show_hand(@dealer)
-      return @interface.show_message 'У дилера перебор' if @dealer.over?
+      return @interface.show_message(:dealer_over) if @rules.over?(@dealer)
     end
   end
 
-  def bank_calculate
-    @interface.show_message 'Подсчет банка'
-    if @user.over?
-      dealer_win
-    elsif @dealer.over?
-      user_win
-    elsif @user.hand_count == @dealer.hand_count
-      equally
+  def create_deck
+    deck = []
+    SUITS.each do |suit|
+      CARDS.each do |quality|
+        deck << Card.new(quality, suit)
+      end
+    end
+    deck.shuffle
+  end
+
+  def one_card
+    @deck.pop
+  end
+
+  def winner!
+    winner = @rules.winner(@dealer, @user)
+    name = case winner.class.to_s
+           when 'Dealer' then :dealer_win
+           when 'User' then :user_win
+           end
+    if winner.nil?
+      @bank.equal(@dealer, @user)
+      @interface.show_message(:equal)
     else
-      @user.hand_count > @dealer.hand_count ? user_win : dealer_win
+      @interface.show_message(name)
+      @bank.calc(winner)
     end
-    distribution_end
   end
 
-  def card
-    card = @cards.shuffle.sample
-    @cards.delete(card)
-    card
-  end
+  # INTERFACE HELPERS
 
-  def dealer_win
-    @interface.show_message 'Дилер выиграл.'
-    @dealer.bank += @bank
-  end
-
-  def user_win
-    @interface.show_message 'Вы выиграли.'
-    @user.bank += @bank
-  end
-
-  def equally
-    @user.bank += @bank / 2
-    @dealer.bank += @bank / 2
-    @bank = 0
-  end
-
-  # Interface helpers
   def show_dealer_hand
     @interface.show_dealer_hand(@dealer)
   end
@@ -132,7 +120,6 @@ class Blackjack
   end
 
   def distribution_end
-    @bank = 0
     @interface.show_bank(@dealer)
     @interface.show_bank(@user)
     @user.hand = []
