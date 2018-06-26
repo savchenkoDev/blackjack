@@ -4,20 +4,26 @@ class Deck
   CARDS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'].freeze
   SUITS = ['♥', '♣', '♦', '♠'].freeze
   def initialize
-    @@deck = []
-    SUITS.each do |suit|
-      CARDS.each do |quality|
-        @@deck << Card.new(suit, quality)
-      end
-    end
-  end
-class << self
-  def deck_shuffle
-    @@deck = @@deck.shuffle
+    @deck = create_deck
   end
 
-  def give_one_card
-    @@deck.pop
+  def one_card
+    @deck.pop
   end
-end
+
+  def last_distr?
+    @deck.size < 5
+  end
+
+  private
+
+  def create_deck
+    deck = []
+    SUITS.each do |suit|
+      CARDS.each do |quality|
+        deck << Card.new(quality, suit)
+      end
+    end
+    deck.shuffle
+  end
 end

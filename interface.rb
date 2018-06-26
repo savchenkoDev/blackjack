@@ -1,7 +1,7 @@
 require_relative 'const.rb'
 
 class Interface
-  def get_user_name
+  def input_user_name
     show_line MESSAGES[:username]
     gets.chomp
   end
@@ -49,11 +49,11 @@ class Interface
     gets.to_i
   end
 
-  def show_hand(player)
+  def show_hand(player, count)
     name = get_player_name(player)
     show_line "Карты #{name}: "
     player.hand.each { |card| show_line "|#{card.value}|" }
-    show_message "Сумма руки: #{player.hand_count}"
+    show_message "   ♦♦♦ Сумма руки: #{count} ♦♦♦"
     # delimiter
   end
 

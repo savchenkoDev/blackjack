@@ -4,22 +4,16 @@ class Player
   attr_reader :name
   attr_accessor :money, :hand
 
-  def initialize(name)
+  def initialize(name, rules)
     @name = name
-    @money = 10
+    @money = 100
     @hand = []
-    @rules = Rules.new
-  end
-
-  def over?
-    hand_count > 21
+    @rules = rules
   end
 
   def take_card(card)
     @hand << card
   end
-
-  def skip_card; end
 
   def hand_count
     @rules.hand_count(self)

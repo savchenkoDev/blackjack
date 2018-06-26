@@ -1,11 +1,6 @@
 require_relative 'player.rb'
 class Dealer < Player
-  def initialize
-    super('Dealer')
-  end
-
-  def take_card(card)
-    return if hand_count >= 17
-    super(card)
+  def initialize(rules)
+    super('Dealer', rules)
   end
 end
