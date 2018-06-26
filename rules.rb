@@ -15,12 +15,10 @@ class Rules
     aces = []
     sum = 0
     player.hand.each do |card|
-      aces << card.quality.to_s if card.quality == 'A'
+      aces << card.quality if card.quality == 'A'
       sum += 'KQJ'.include?(card.quality.to_s) ? 10 : card.quality.to_i
     end
-    return sum if aces.empty?
-    aces.size.times { sum += sum + 11 > 21 ? 1 : 11 }
-    sum
+    aces_count(sum, aces)
   end
 
   def winner(dealer, user)
@@ -28,5 +26,19 @@ class Rules
     return dealer if over?(user)
     return nil if hand_count(dealer) == hand_count(user)
     hand_count(dealer) > hand_count(user) ? dealer : user
+  end
+
+  private
+
+  def aces_count(sum, aces)
+    until aces.empty?
+      if sum + aces.size * 11 <= 21
+        aces.size.times { sum += 11 }
+      else
+        sum += 1
+      end
+      aces.pop
+    end
+    sum
   end
 end

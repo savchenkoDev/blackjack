@@ -33,9 +33,8 @@ class Interface
     delimiter
   end
 
-  def next_distr
-    show_message 'Нажмите <enter> чтобы продолжить'
-    gets
+  def goodbye(name)
+    show_message "До свидания, #{name}."
   end
 
   def show_bank(player)

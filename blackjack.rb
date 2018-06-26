@@ -46,7 +46,11 @@ class Blackjack
     dealer_turn
     winner!
     distribution_end
-    @interface.next_distr
+    answer = @interface.get_user_answer(:next_distr)
+    if answer != 1
+      @interface.goodbye(@user.name)
+      exit
+    end
   end
 
   def dustribution_start
