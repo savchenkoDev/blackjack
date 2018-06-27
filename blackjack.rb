@@ -11,7 +11,7 @@ class Blackjack
   def initialize
     @deck = Deck.new
     @rules = Rules.new
-    @dealer = Dealer.new(@rules)
+    @dealer = Dealer.new
     @interface = Interface.new
     @bank = BankManager.new
   end
@@ -37,7 +37,7 @@ class Blackjack
 
   def create_user
     name = @user.nil? ? @interface.input_user_name : @user.name
-    @user = User.new(name, @rules)
+    @user = User.new(name)
     @interface.show_welcome(name)
   end
 

@@ -4,11 +4,10 @@ class Player
   attr_reader :name
   attr_accessor :money, :hand
 
-  def initialize(name, rules)
+  def initialize(name)
     @name = name
     @money = 100
     @hand = []
-    @rules = rules
   end
 
   def take_card(card)
