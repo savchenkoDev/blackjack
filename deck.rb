@@ -1,8 +1,6 @@
 require_relative 'card.rb'
 
 class Deck
-  CARDS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'].freeze
-  SUITS = ['♥', '♣', '♦', '♠'].freeze
   def initialize
     @deck = create_deck
   end
@@ -19,8 +17,8 @@ class Deck
 
   def create_deck
     deck = []
-    SUITS.each do |suit|
-      CARDS.each do |quality|
+    Card::SUITS.each do |suit|
+      Card::QUALITIES.each do |quality|
         deck << Card.new(quality, suit)
       end
     end

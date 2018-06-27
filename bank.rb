@@ -3,7 +3,6 @@ require_relative 'const.rb'
 class BankManager
   def initialize
     @bank = 0
-    @rules = Rules.new
   end
 
   def add(dealer, user)

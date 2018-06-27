@@ -28,7 +28,9 @@ class Blackjack
 
   def new_game
     create_user
-    while @rules.victory?(@dealer, @user) do distribution end
+    while @rules.victory?(@dealer, @user)
+      distribution
+    end
     @interface.show_message(:victory) if @dealer.money.zero?
     @interface.show_message(:loose) if @user.money.zero?
   end
@@ -57,15 +59,15 @@ class Blackjack
     @deck = Deck.new if @deck.last_distr?
     @bank.add(@dealer, @user)
     2.times do
-      @user.hand << @deck.one_card
-      @dealer.hand << @deck.one_card
+      @user.take_card(@deck.one_card)
+      @dealer.take_card(@deck.one_card)
     end
   end
 
   def user_turn
     loop do
       show_dealer_hand
-      @interface.show_hand(@user, @rules.hand_count(@user))
+      @interface.show_hand(@user, @user.hand_count)
       return @interface.show_message(:user_over) if @rules.over?(@user)
       @interface.show_message(:user_turn)
       answer = @interface.get_user_answer(:distr_answer)
@@ -77,11 +79,11 @@ class Blackjack
   def dealer_turn
     return if @rules.over?(@user)
     @interface.show_message(:dealer_turn)
-    @interface.show_hand(@dealer, @rules.hand_count(@dealer))
+    @interface.show_hand(@dealer, @dealer.hand_count)
     while @rules.take_card?(@dealer)
       @interface.show_message(:dealer_take_card)
       @dealer.take_card(@deck.one_card)
-      @interface.show_hand(@dealer, @rules.hand_count(@dealer))
+      @interface.show_hand(@dealer, @dealer.hand_count)
       return @interface.show_message(:dealer_over) if @rules.over?(@dealer)
     end
   end
@@ -105,8 +107,8 @@ class Blackjack
   end
 
   def show_hands
-    @interface.show_hand(@dealer, @rules.hand_count(@dealer))
-    @interface.show_hand(@user, @rules.hand_count(@user))
+    @interface.show_hand(@dealer, @dealer.hand_count)
+    @interface.show_hand(@user, @user.hand_count)
   end
 
   def distribution_end
